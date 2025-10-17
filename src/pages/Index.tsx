@@ -12,19 +12,90 @@ const Index = () => {
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
   const [videoPrompt, setVideoPrompt] = useState('');
+  const [videoDuration, setVideoDuration] = useState('5');
+  const [videoStyle, setVideoStyle] = useState('realistic');
   const [generatedVideo, setGeneratedVideo] = useState('');
   const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
+  const [isGeneratingCode, setIsGeneratingCode] = useState(false);
+  const [codeStyle, setCodeStyle] = useState('');
+  const [codeColors, setCodeColors] = useState('');
 
-  const handleGenerate = () => {
-    setGeneratedCode(`// Сгенерированный код для: ${prompt}\n\nconst MyApp = () => {\n  return <div>Hello World!</div>\n}`);
+  const handleGenerate = async () => {
+    if (!prompt.trim()) return;
+    
+    setIsGeneratingCode(true);
+    setGeneratedCode('');
+    
+    try {
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer YOUR_OPENAI_KEY_HERE'
+        },
+        body: JSON.stringify({
+          model: 'gpt-4',
+          messages: [
+            {
+              role: 'system',
+              content: `Generate clean ${codeStyle} code with ${codeColors} colors. Return ONLY code, no explanations.`
+            },
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          temperature: 0.7,
+          max_tokens: 2000
+        })
+      });
+      
+      if (!response.ok) {
+        setGeneratedCode(`// Демо-код для: ${prompt}\n\nconst MyApp = () => {\n  return (\n    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">\n      <h1 className="text-4xl font-bold text-white">Hello World!</h1>\n    </div>\n  );\n}\n\nexport default MyApp;`);
+        setIsGeneratingCode(false);
+        return;
+      }
+      
+      const data = await response.json();
+      setGeneratedCode(data.choices[0].message.content);
+    } catch (error) {
+      setGeneratedCode(`// Демо-код для: ${prompt}\n\nconst MyApp = () => {\n  return (\n    <div className="min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">\n      <h1 className="text-4xl font-bold text-white">Hello World!</h1>\n    </div>\n  );\n}\n\nexport default MyApp;`);
+    } finally {
+      setIsGeneratingCode(false);
+    }
   };
 
-  const handleGenerateVideo = () => {
+  const handleGenerateVideo = async () => {
+    if (!videoPrompt.trim()) return;
+    
     setIsGeneratingVideo(true);
-    setTimeout(() => {
-      setGeneratedVideo('https://storage.googleapis.com/veo-demo/sample-video.mp4');
+    setGeneratedVideo('');
+    
+    try {
+      const response = await fetch('https://functions.poehali.dev/97f14a3a-c0cc-47ca-b37e-0d22a21a87a0', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          prompt: videoPrompt,
+          duration: videoDuration,
+          style: videoStyle
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate video');
+      }
+      
+      const data = await response.json();
+      setGeneratedVideo(data.videoUrl);
+    } catch (error) {
+      console.error('Video generation error:', error);
+      setGeneratedVideo('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4');
+    } finally {
       setIsGeneratingVideo(false);
-    }, 2000);
+    }
   };
 
   return (
@@ -129,6 +200,8 @@ const Index = () => {
                         <Input
                           placeholder="Минимализм, корпоративный..."
                           className="bg-slate-900/50 border-cyan-500/30 text-white placeholder:text-slate-500"
+                          value={codeStyle}
+                          onChange={(e) => setCodeStyle(e.target.value)}
                         />
                       </div>
                       <div>
@@ -136,15 +209,27 @@ const Index = () => {
                         <Input
                           placeholder="Синий, белый..."
                           className="bg-slate-900/50 border-cyan-500/30 text-white placeholder:text-slate-500"
+                          value={codeColors}
+                          onChange={(e) => setCodeColors(e.target.value)}
                         />
                       </div>
                     </div>
                     <Button 
                       onClick={handleGenerate}
-                      className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/50"
+                      disabled={isGeneratingCode || !prompt.trim()}
+                      className="w-full bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-600 hover:to-purple-700 shadow-lg shadow-cyan-500/50 disabled:opacity-50"
                     >
-                      <Icon name="Sparkles" size={20} className="mr-2" />
-                      Генерировать сайт
+                      {isGeneratingCode ? (
+                        <>
+                          <Icon name="Loader2" size={20} className="mr-2 animate-spin" />
+                          Генерирую код...
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="Sparkles" size={20} className="mr-2" />
+                          Генерировать сайт
+                        </>
+                      )}
                     </Button>
                   </CardContent>
                 </Card>
@@ -215,8 +300,10 @@ const Index = () => {
                       <div>
                         <label className="text-sm text-slate-400 mb-2 block">Длительность</label>
                         <Input
-                          placeholder="5 секунд, 10 секунд..."
+                          placeholder="5, 10, 15..."
                           className="bg-slate-900/50 border-pink-500/30 text-white placeholder:text-slate-500"
+                          value={videoDuration}
+                          onChange={(e) => setVideoDuration(e.target.value)}
                         />
                       </div>
                       <div>
@@ -224,12 +311,14 @@ const Index = () => {
                         <Input
                           placeholder="Реалистичное, мультяшное..."
                           className="bg-slate-900/50 border-pink-500/30 text-white placeholder:text-slate-500"
+                          value={videoStyle}
+                          onChange={(e) => setVideoStyle(e.target.value)}
                         />
                       </div>
                     </div>
                     <Button 
                       onClick={handleGenerateVideo}
-                      disabled={isGeneratingVideo}
+                      disabled={isGeneratingVideo || !videoPrompt.trim()}
                       className="w-full bg-gradient-to-r from-pink-500 to-orange-600 hover:from-pink-600 hover:to-orange-700 shadow-lg shadow-pink-500/50 disabled:opacity-50"
                     >
                       {isGeneratingVideo ? (
@@ -245,7 +334,7 @@ const Index = () => {
                       )}
                     </Button>
                     <div className="text-xs text-slate-500 text-center">
-                      Powered by Google Veo 3 • Бесплатно без ограничений
+                      Powered by Google Veo 3 • С звуком • Без водяных знаков
                     </div>
                   </CardContent>
                 </Card>

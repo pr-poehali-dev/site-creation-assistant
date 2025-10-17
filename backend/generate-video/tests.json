@@ -1,0 +1,19 @@
+{
+  "tests": [
+    {
+      "name": "Test video generation",
+      "method": "POST",
+      "body": {
+        "prompt": "A spaceship flying through space",
+        "duration": "5",
+        "style": "realistic"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {
+        "videoUrl": "string",
+        "prompt": "string"
+      },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
