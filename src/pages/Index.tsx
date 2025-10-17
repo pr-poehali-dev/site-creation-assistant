@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
+import StatsSection from '@/components/StatsSection';
 import GeneratorSection from '@/components/GeneratorSection';
 import PricingSection from '@/components/PricingSection';
 import FAQSection from '@/components/FAQSection';
@@ -102,6 +103,7 @@ const Index = () => {
       
       <Navigation />
       <HeroSection />
+      <StatsSection />
       <GeneratorSection
         prompt={prompt}
         setPrompt={setPrompt}
