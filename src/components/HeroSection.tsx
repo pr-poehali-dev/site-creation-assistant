@@ -4,14 +4,16 @@ import Icon from '@/components/ui/icon';
 
 const HeroSection = () => {
   return (
-    <section id="home" className="relative py-20 md:py-32">
-      <div className="container mx-auto px-4">
+    <section id="home" className="relative py-20 md:py-32 overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 via-purple-500/20 to-pink-500/20 animate-gradient-shift"></div>
+      
+      <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
           <Badge className="mb-6 bg-cyan-500/10 text-cyan-400 border-cyan-500/50 hover:bg-cyan-500/20">
             <Icon name="Zap" size={16} className="mr-1" />
             Без ограничений • Бесплатно навсегда
           </Badge>
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight animate-gradient-text bg-[length:200%_auto]">
             Создавай сайты и ботов за секунды
           </h1>
           <p className="text-xl md:text-2xl text-slate-400 mb-8 leading-relaxed">

@@ -14,7 +14,7 @@ const Footer = () => {
             </span>
           </div>
           <p className="text-slate-400">
-            © 2024 GenAI Studio. Создавай без границ.
+            Создавай без границ
           </p>
         </div>
       </div>
