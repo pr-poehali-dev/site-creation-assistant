@@ -11,9 +11,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 const Index = () => {
   const [prompt, setPrompt] = useState('');
   const [generatedCode, setGeneratedCode] = useState('');
+  const [videoPrompt, setVideoPrompt] = useState('');
+  const [generatedVideo, setGeneratedVideo] = useState('');
+  const [isGeneratingVideo, setIsGeneratingVideo] = useState(false);
 
   const handleGenerate = () => {
     setGeneratedCode(`// Сгенерированный код для: ${prompt}\n\nconst MyApp = () => {\n  return <div>Hello World!</div>\n}`);
+  };
+
+  const handleGenerateVideo = () => {
+    setIsGeneratingVideo(true);
+    setTimeout(() => {
+      setGeneratedVideo('https://storage.googleapis.com/veo-demo/sample-video.mp4');
+      setIsGeneratingVideo(false);
+    }, 2000);
   };
 
   return (
@@ -79,7 +90,7 @@ const Index = () => {
             </div>
 
             <Tabs defaultValue="site" className="w-full">
-              <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-slate-800/50 border border-cyan-500/20">
+              <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-3 bg-slate-800/50 border border-cyan-500/20">
                 <TabsTrigger value="site" className="data-[state=active]:bg-cyan-500/20 data-[state=active]:text-cyan-400">
                   <Icon name="Globe" size={18} className="mr-2" />
                   Сайт
@@ -87,6 +98,10 @@ const Index = () => {
                 <TabsTrigger value="bot" className="data-[state=active]:bg-purple-500/20 data-[state=active]:text-purple-400">
                   <Icon name="Bot" size={18} className="mr-2" />
                   Бот
+                </TabsTrigger>
+                <TabsTrigger value="video" className="data-[state=active]:bg-pink-500/20 data-[state=active]:text-pink-400">
+                  <Icon name="Video" size={18} className="mr-2" />
+                  Видео
                 </TabsTrigger>
               </TabsList>
 
@@ -174,7 +189,104 @@ const Index = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
+
+              <TabsContent value="video" className="mt-8">
+                <Card className="bg-slate-800/50 border-pink-500/20 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-pink-400 flex items-center gap-2">
+                      <Icon name="Sparkles" size={24} />
+                      Генерация видео с Veo 3
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Опиши сцену — получи профессиональное видео от Google AI
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <label className="text-sm text-slate-400 mb-2 block">Опиши что должно быть в видео</label>
+                      <Textarea
+                        placeholder="Например: Космический корабль летит сквозь туманность, камера медленно приближается, яркие звезды на фоне..."
+                        className="bg-slate-900/50 border-pink-500/30 text-white placeholder:text-slate-500 min-h-32"
+                        value={videoPrompt}
+                        onChange={(e) => setVideoPrompt(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm text-slate-400 mb-2 block">Длительность</label>
+                        <Input
+                          placeholder="5 секунд, 10 секунд..."
+                          className="bg-slate-900/50 border-pink-500/30 text-white placeholder:text-slate-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm text-slate-400 mb-2 block">Стиль</label>
+                        <Input
+                          placeholder="Реалистичное, мультяшное..."
+                          className="bg-slate-900/50 border-pink-500/30 text-white placeholder:text-slate-500"
+                        />
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={handleGenerateVideo}
+                      disabled={isGeneratingVideo}
+                      className="w-full bg-gradient-to-r from-pink-500 to-orange-600 hover:from-pink-600 hover:to-orange-700 shadow-lg shadow-pink-500/50 disabled:opacity-50"
+                    >
+                      {isGeneratingVideo ? (
+                        <>
+                          <Icon name="Loader2" size={20} className="mr-2 animate-spin" />
+                          Генерирую видео...
+                        </>
+                      ) : (
+                        <>
+                          <Icon name="Video" size={20} className="mr-2" />
+                          Генерировать видео
+                        </>
+                      )}
+                    </Button>
+                    <div className="text-xs text-slate-500 text-center">
+                      Powered by Google Veo 3 • Бесплатно без ограничений
+                    </div>
+                  </CardContent>
+                </Card>
+              </TabsContent>
             </Tabs>
+
+            {generatedVideo && (
+              <Card className="mt-8 bg-slate-800/50 border-pink-500/20 backdrop-blur-sm animate-fade-in">
+                <CardHeader>
+                  <CardTitle className="text-pink-400 flex items-center gap-2">
+                    <Icon name="CheckCircle" size={24} />
+                    Видео готово!
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="bg-slate-950 rounded-lg overflow-hidden border border-pink-500/30">
+                    <video 
+                      controls 
+                      className="w-full"
+                      poster="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=800&h=450&fit=crop"
+                    >
+                      <source src={generatedVideo} type="video/mp4" />
+                    </video>
+                  </div>
+                  <div className="flex gap-3 mt-4">
+                    <Button variant="outline" className="border-pink-500/50 text-pink-400 hover:bg-pink-500/10">
+                      <Icon name="Download" size={18} className="mr-2" />
+                      Скачать MP4
+                    </Button>
+                    <Button variant="outline" className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10">
+                      <Icon name="Share2" size={18} className="mr-2" />
+                      Поделиться
+                    </Button>
+                    <Button variant="outline" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
+                      <Icon name="Wand2" size={18} className="mr-2" />
+                      Создать еще
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {generatedCode && (
               <Card className="mt-8 bg-slate-800/50 border-green-500/20 backdrop-blur-sm animate-fade-in">
